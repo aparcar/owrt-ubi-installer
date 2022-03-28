@@ -23,12 +23,14 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+        uses:
+          path: /tmp/repo/
 
       - name: Install libfdt-dev and cmake
         run: sudo apt install libfdt-dev cmake
 
       - name: Run builder script
-        run: mkdir -m 0700 $HOME/.gnupg ; bash build_installer.sh
+        run: mkdir -m 0700 $HOME/.gnupg ; cd /tmp/repo/; bash build_installer.sh
 
 #      - name: Store created images
 #        uses: actions/upload-artifact@v2
@@ -50,9 +52,9 @@ jobs:
 
       - name: Determine filenames
         run: |
-          echo "SYSUPGRADE_ITB=$(ls -1 | grep sysupgrade.itb)" >> "$GITHUB_ENV"
-          echo "RECOVERY_ITB=$(ls -1 | grep recovery.itb)" >> "$GITHUB_ENV"
-          echo "INSTALLER_ITB=$(ls -1 | grep installer.itb)" >> "$GITHUB_ENV"
+          echo "SYSUPGRADE_ITB=$(ls /tmp/repo/ -1 | grep sysupgrade.itb)" >> "$GITHUB_ENV"
+          echo "RECOVERY_ITB=$(ls /tmp/repo/ -1 | grep recovery.itb)" >> "$GITHUB_ENV"
+          echo "INSTALLER_ITB=$(ls /tmp/repo/ -1 | grep installer.itb)" >> "$GITHUB_ENV"
 
       - name: Upload sysupgrade
         uses: actions/upload-release-asset@v1
@@ -60,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.SYSUPGRADE_ITB }}
+          asset_path: /tmp/repo/${{ env.SYSUPGRADE_ITB }}
           asset_name: ${{ env.SYSUPGRADE_ITB }}
           asset_content_type: application/octet-stream
 
@@ -70,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.RECOVERY_ITB }}
+          asset_path: /tmp/repo/${{ env.RECOVERY_ITB }}
           asset_name: ${{ env.RECOVERY_ITB }}
           asset_content_type: application/octet-stream
 
@@ -80,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.INSTALLER_ITB }}
+          asset_path: /tmp/repo/${{ env.INSTALLER_ITB }}
           asset_name: ${{ env.INSTALLER_ITB }}
           asset_content_type: application/octet-stream
 
